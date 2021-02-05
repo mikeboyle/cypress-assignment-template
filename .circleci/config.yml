@@ -1,7 +1,9 @@
-jobs:
-  test:
-    executor: cypress/base:<< parameters.node >>
-    steps:
+version: 2.1
+orbs:
+  cypress: cypress-io/cypress@1
+workflows:
+  build:
+    jobs:
       - cypress/run:
           post-steps:
             - store_test_results:
@@ -10,14 +12,7 @@ jobs:
                 path: cypress/videos
             - store_artifacts:
                 path: cypress/screenshots
-      - run:
-          name: Parse Test Results
-          command: node ./scripts/parseJunit.js $CIRCLE_PR_USERNAME $CIRCLE_BRANCH
-          when: always
-version: 2.1
-orbs:
-  cypress: cypress-io/cypress@1
-workflows:
-  build:
-    jobs:
-      - test
+            - run:
+                name: Parse Test Results
+                command: node ./scripts/parseJunit.js $CIRCLE_PR_USERNAME $CIRCLE_BRANCH
+                when: always
