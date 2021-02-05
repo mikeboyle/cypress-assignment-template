@@ -1,39 +1,45 @@
 const Parser = require('junitxml-to-javascript');
+const path = require('path');
+const fg = require('fast-glob');
+
+const branch = process.argv[3] || 'branch';
+const username = process.argv[2] || branch;
+let numSuites = 0;
+const passedSuites = [];
+const failedSuites = [];
 
 /**
  * Determine how many test files passed and output to console.
  * This can be extended to send the same data elsewhere, ex: slack, LMS
  */
 
-const branch = process.argv[3] || 'branch';
-const username = process.argv[2] || branch;
+const passed = (suite) => suite.succeeded === suite.tests;
 
-new Parser()
-  .parseXMLFile(__dirname + '/../reports/junit/junit.xml')
-  .then((report) => {
+const parseAllFiles = async () => {
+  const glob = __dirname + '/../reports/junit/junit-*.xml';
+  const fileNames = fg.sync(glob);
+  numSuites = fileNames.length;
+
+  for (const file of fileNames) {
+    const report = await new Parser().parseXMLFile(file);
     const { testsuites } = report;
-    let numSuites = testsuites.length;
-    let failedSuites = [];
-    let passedSuites = [];
-    testsuites.forEach((suite) => {
-      const { name, succeeded: numPassed, tests: numTests } = suite;
-      if (numPassed === numTests) {
-        passedSuites.push(name);
-      } else {
-        failedSuites.push(name);
-      }
-    });
 
-    if (passedSuites.length === numSuites) {
-      notifyPass(username, numSuites);
+    let testFilePassed = testsuites.every((ts) => passed(ts));
+
+    if (testFilePassed) {
+      passedSuites.push(testsuites[0].name);
     } else {
-      notifyFail(username, numSuites, passedSuites, failedSuites);
+      let failed = testsuites.filter((ts) => !passed(ts));
+      failedSuites.push(failed[0].name);
     }
-  })
-  .catch((err) => {
-    console.error(err.message);
-    process.exit(1);
-  });
+  }
+
+  if (passedSuites.length === numSuites) {
+    notifyPass(username, numSuites);
+  } else {
+    notifyFail(username, numSuites, passedSuites, failedSuites);
+  }
+};
 
 const notifyPass = (username, numSuites) => {
   console.log(`Yay! ${username} passed all ${numSuites} tests!`);
@@ -44,3 +50,5 @@ const notifyFail = (username, numSuites, passedSuites, failedSuites) => {
   console.log('Failing tests:');
   failedSuites.forEach((name) => console.log(name));
 };
+
+parseAllFiles();

@@ -7,4 +7,5 @@ workflows:
       - cypress/run:
           post-steps:
             - store_test_results:
-                path: cypress/results
+                path: ./reports/junit
+            - store_artifacts: true

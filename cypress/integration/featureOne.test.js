@@ -3,7 +3,7 @@ describe('feature one', () => {
     cy.visit('./index.html');
   });
 
-  it('fails this test', () => {
-    expect(2).to.eq('foo');
+  it('passes this test', () => {
+    expect('foo').to.eq('foo');
   });
 });
