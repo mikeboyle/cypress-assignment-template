@@ -1,5 +1,6 @@
 jobs:
   test:
+    executor: cypress/base:<< parameters.node >>
     steps:
       - cypress/run:
           post-steps:
@@ -13,7 +14,6 @@ jobs:
           name: Parse Test Results
           command: node ./scripts/parseJunit.js $CIRCLE_PR_USERNAME $CIRCLE_BRANCH
           when: always
-
 version: 2.1
 orbs:
   cypress: cypress-io/cypress@1
