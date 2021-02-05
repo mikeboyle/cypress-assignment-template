@@ -8,3 +8,7 @@ workflows:
           post-steps:
             - store_test_results:
                 path: ./reports/junit
+            - store_artifacts:
+                path: cypress/videos
+            - store_artifacts:
+                path: cypress/screenshots
