@@ -1,0 +1,9 @@
+{
+    "reporter": "mocha-multi-reporters",
+    "reporterOptions": {
+        "reporterEnabled": "spec, mocha-junit-reporter",
+        "mochaJunitReporterReporterOptions": {
+            "mochaFile": "cypress/results/junit.xml"
+        }
+    }
+}
